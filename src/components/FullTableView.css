@@ -38,6 +38,12 @@
 
 .sort-icon {
   opacity: 0.3;
+  transition: all 0.2s;
+}
+
+.sort-icon.active {
+  opacity: 1;
+  color: var(--accent-blue);
 }
 
 .issues-table th:hover .sort-icon {

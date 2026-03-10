@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { formatDistanceToNow, isPast } from 'date-fns';
-import { Copy, AlertTriangle, ArrowUpDown } from 'lucide-react';
+import { Copy, AlertTriangle, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import './FullTableView.css';
 
 export function FullTableView({ issues, jiraBaseUrl, onIssueClick }) {
@@ -11,6 +11,13 @@ export function FullTableView({ issues, jiraBaseUrl, onIssueClick }) {
       key,
       asc: prev.key === key ? !prev.asc : true,
     }));
+  };
+
+  const renderSortIcon = (columnKey) => {
+    if (sortParam.key !== columnKey) return <ArrowUpDown size={12} className="sort-icon inactive" />;
+    return sortParam.asc 
+      ? <ArrowUp size={12} className="sort-icon active" /> 
+      : <ArrowDown size={12} className="sort-icon active" />;
   };
 
   const sortedIssues = useMemo(() => {
@@ -29,6 +36,8 @@ export function FullTableView({ issues, jiraBaseUrl, onIssueClick }) {
           valA = a.fields?.duedate || '9999-12-31'; valB = b.fields?.duedate || '9999-12-31'; break;
         case 'project':
           valA = a.fields?.project?.name; valB = b.fields?.project?.name; break;
+        case 'created':
+          valA = new Date(a.fields?.created).getTime(); valB = new Date(b.fields?.created).getTime(); break;
         case 'updated':
           valA = new Date(a.fields?.updated).getTime(); valB = new Date(b.fields?.updated).getTime(); break;
         default:
@@ -52,25 +61,28 @@ export function FullTableView({ issues, jiraBaseUrl, onIssueClick }) {
         <thead>
           <tr>
             <th onClick={() => handleSort('key')} className="sticky-col">
-              <div className="th-content">Key <ArrowUpDown size={12} className="sort-icon" /></div>
+              <div className="th-content">Key {renderSortIcon('key')}</div>
             </th>
             <th onClick={() => handleSort('title')} style={{ minWidth: '350px' }}>
-              <div className="th-content">Title <ArrowUpDown size={12} className="sort-icon" /></div>
+              <div className="th-content">Title {renderSortIcon('title')}</div>
             </th>
             <th onClick={() => handleSort('status')}>
-              <div className="th-content">Status <ArrowUpDown size={12} className="sort-icon" /></div>
+              <div className="th-content">Status {renderSortIcon('status')}</div>
             </th>
             <th onClick={() => handleSort('priority')}>
-              <div className="th-content">Priority <ArrowUpDown size={12} className="sort-icon" /></div>
+              <div className="th-content">Priority {renderSortIcon('priority')}</div>
             </th>
             <th onClick={() => handleSort('project')}>
-              <div className="th-content">Project <ArrowUpDown size={12} className="sort-icon" /></div>
+              <div className="th-content">Project {renderSortIcon('project')}</div>
+            </th>
+            <th onClick={() => handleSort('created')}>
+              <div className="th-content">Created {renderSortIcon('created')}</div>
             </th>
             <th onClick={() => handleSort('duedate')}>
-              <div className="th-content">Due Date <ArrowUpDown size={12} className="sort-icon" /></div>
+              <div className="th-content">Due Date {renderSortIcon('duedate')}</div>
             </th>
             <th onClick={() => handleSort('updated')}>
-              <div className="th-content">Updated <ArrowUpDown size={12} className="sort-icon" /></div>
+              <div className="th-content">Updated {renderSortIcon('updated')}</div>
             </th>
           </tr>
         </thead>
@@ -126,6 +138,9 @@ export function FullTableView({ issues, jiraBaseUrl, onIssueClick }) {
                     <span className="project-name">{issue.fields?.project?.name}</span>
                   </div>
                 </td>
+                <td className="created-cell" title={issue.fields?.created ? new Date(issue.fields.created).toLocaleString() : ''}>
+                  {issue.fields?.created ? formatDistanceToNow(new Date(issue.fields.created), { addSuffix: true }) : '-'}
+                </td>
                 <td className={isOverdue ? 'overdue' : ''}>
                   {issue.fields?.duedate ? (
                     <div className="date-cell">
@@ -134,7 +149,7 @@ export function FullTableView({ issues, jiraBaseUrl, onIssueClick }) {
                     </div>
                   ) : <span className="empty-dash">-</span>}
                 </td>
-                <td className="updated-cell">
+                <td className="updated-cell" title={issue.fields?.updated ? new Date(issue.fields.updated).toLocaleString() : ''}>
                   {formatDistanceToNow(new Date(issue.fields?.updated), { addSuffix: true })}
                 </td>
               </tr>

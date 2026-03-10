@@ -1,6 +1,7 @@
 import React from 'react';
 import { Search, List, LayoutGrid, RefreshCw, LogOut } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { MultiSelect } from './MultiSelect';
 import './TopBar.css';
 
 export function TopBar({ 
@@ -14,18 +15,19 @@ export function TopBar({
   filters,
   setFilters,
   statuses,
-  projects
+  projects,
+  userProfile
 }) {
   const handleSearchChange = (e) => {
     setFilters(prev => ({ ...prev, search: e.target.value }));
   };
 
-  const handleStatusChange = (e) => {
-    setFilters(prev => ({ ...prev, status: e.target.value }));
+  const handleStatusChange = (newStatuses) => {
+    setFilters(prev => ({ ...prev, status: newStatuses }));
   };
 
-  const handleProjectChange = (e) => {
-    setFilters(prev => ({ ...prev, project: e.target.value }));
+  const handleProjectChange = (newProjects) => {
+    setFilters(prev => ({ ...prev, project: newProjects }));
   };
 
   const syncText = lastSynced ? `Synced ${formatDistanceToNow(new Date(lastSynced), { addSuffix: true })}` : 'Not synced yet';
@@ -55,23 +57,20 @@ export function TopBar({
         </div>
         
         <div className="filters">
-          <select 
-            value={filters.status} 
-            onChange={handleStatusChange} 
-            className={`filter-select ${filters.status ? 'filter-active' : ''}`}
-          >
-            <option value="">All Statuses</option>
-            {statuses.map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
+          <MultiSelect 
+            options={statuses}
+            selected={filters.status || []}
+            onChange={handleStatusChange}
+            placeholder="All Statuses"
+          />
           
-          <select 
-            value={filters.project} 
-            onChange={handleProjectChange} 
-            className={`filter-select hide-mobile ${filters.project ? 'filter-active' : ''}`}
-          >
-            <option value="">All Projects</option>
-            {projects.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
+          <MultiSelect 
+            options={projects}
+            selected={filters.project || []}
+            onChange={handleProjectChange}
+            placeholder="All Projects"
+            className="hide-mobile"
+          />
         </div>
       </div>
 
@@ -101,9 +100,29 @@ export function TopBar({
         </div>
 
         <div className="user-profile">
-          <div className="avatar" title="OAuth User">
-            U
-          </div>
+          {userProfile ? (
+            <>
+              <div 
+                className="avatar" 
+                title={userProfile.displayName}
+                style={userProfile.avatarUrls?.['48x48'] ? {
+                  backgroundImage: `url(${userProfile.avatarUrls['48x48']})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  color: 'transparent'
+                } : {}}
+              >
+                {!userProfile.avatarUrls?.['48x48'] && userProfile.displayName.charAt(0).toUpperCase()}
+              </div>
+              <span className="user-name hide-mobile" style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-primary)' }}>
+                {userProfile.displayName}
+              </span>
+            </>
+          ) : (
+            <div className="avatar" title="OAuth User">
+              U
+            </div>
+          )}
           <button className="logout-btn" onClick={onLogout} title="Disconnect Atlassian Account">
             <LogOut size={16} />
           </button>
