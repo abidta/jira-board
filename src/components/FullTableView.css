@@ -1,0 +1,189 @@
+.table-wrapper {
+  overflow-x: auto;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.issues-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.issues-table th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-weight: 500;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.issues-table th:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.th-content {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sort-icon {
+  opacity: 0.3;
+}
+
+.issues-table th:hover .sort-icon {
+  opacity: 1;
+}
+
+.issues-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  vertical-align: middle;
+}
+
+.issues-table tbody tr {
+  transition: background-color 0.1s;
+}
+
+.issues-table tbody tr:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.issues-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.issue-key-link-cell {
+  color: inherit;
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: all 0.2s ease;
+}
+
+.issue-key-link-cell:hover {
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: underline;
+}
+
+.sticky-col {
+  position: sticky;
+  left: 0;
+  background-color: inherit;
+  z-index: 2;
+  border-right: 1px solid var(--border-color);
+}
+
+.issues-table th.sticky-col {
+  background-color: var(--bg-tertiary);
+  z-index: 3;
+}
+
+.key-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.copy-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  padding: 0.2rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.issues-table tbody tr:hover .copy-btn {
+  opacity: 1;
+}
+
+.copy-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.summary-text {
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.type-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.priority-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.priority-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.project-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.project-avatar {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.date-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.overdue {
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+.updated-cell {
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.empty-dash {
+  color: var(--text-muted);
+}
