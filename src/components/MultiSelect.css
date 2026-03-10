@@ -1,0 +1,121 @@
+.multi-select-container {
+  position: relative;
+  min-width: 160px;
+  font-family: var(--font-body);
+}
+
+.multi-select-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.multi-select-trigger:focus,
+.multi-select-trigger:hover {
+  border-color: var(--accent-blue);
+}
+
+.multi-select-trigger.active {
+  border-color: var(--accent-blue);
+  background-color: var(--accent-blue-transparent);
+  color: var(--accent-blue);
+  font-weight: 500;
+}
+
+.multi-select-trigger .truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.chevron {
+  color: var(--text-muted);
+  transition: transform 0.2s ease;
+}
+
+.multi-select-trigger.active .chevron {
+  color: var(--accent-blue);
+}
+
+.chevron.open {
+  transform: rotate(180deg);
+}
+
+.multi-select-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  min-width: 200px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 50;
+  padding: 0.5rem 0;
+}
+
+.multi-select-empty {
+  padding: 0.5rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.multi-select-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.multi-select-item:hover {
+  background-color: var(--bg-tertiary);
+}
+
+.multi-select-item.selected {
+  background-color: var(--accent-blue-transparent);
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--text-muted);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.checkbox.checked {
+  background-color: var(--accent-blue);
+  border-color: var(--accent-blue);
+  color: white;
+}
+
+.multi-select-item .truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}

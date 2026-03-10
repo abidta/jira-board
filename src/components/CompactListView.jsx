@@ -37,7 +37,7 @@ export function CompactListView({ issues, jiraBaseUrl, onIssueClick }) {
                 <span className="project-tag">{issue.fields?.project?.name}</span>
               </div>
               
-              <div className={`list-col-date ${isOverdue ? 'overdue' : ''}`}>
+              <div className={`list-col-date ${isOverdue ? 'overdue' : ''}`} title={issue.fields?.duedate ? new Date(issue.fields.duedate).toLocaleString() : ''}>
                 {issue.fields?.duedate ? (
                   <>
                     {isOverdue && <AlertTriangle size={12} />}

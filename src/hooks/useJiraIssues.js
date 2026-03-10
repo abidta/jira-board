@@ -11,6 +11,11 @@ export function useJiraIssues(oauthCredentials) {
     return localStorage.getItem('jira_last_sync') || null;
   });
 
+  const [userProfile, setUserProfile] = useState(() => {
+    const cached = localStorage.getItem('jira_user_profile');
+    return cached ? JSON.parse(cached) : null;
+  });
+
   const fetchIssues = useCallback(async () => {
     if (!oauthCredentials || !oauthCredentials.accessToken || !oauthCredentials.cloudId) return;
     setLoading(true);
@@ -26,7 +31,7 @@ export function useJiraIssues(oauthCredentials) {
     }
 
     const jql = 'assignee=currentUser() ORDER BY updated DESC';
-    const fields = 'summary,status,priority,duedate,project,issuetype,updated,description,reporter,timetracking';
+    const fields = 'summary,status,priority,duedate,project,issuetype,updated,created,description,reporter,timetracking';
     const maxResults = 100;
     
     const query = new URLSearchParams({
@@ -37,15 +42,25 @@ export function useJiraIssues(oauthCredentials) {
     
     // New OAuth API endpoint using api.atlassian.com and cloudId
     const url = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/search/jql?${query.toString()}`;
+    const myselfUrl = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/myself`;
 
     try {
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Accept': 'application/json'
-        }
-      });
+      const [response, myselfResponse] = await Promise.all([
+        fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json'
+          }
+        }),
+        fetch(myselfUrl, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json'
+          }
+        })
+      ]);
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -59,6 +74,12 @@ export function useJiraIssues(oauthCredentials) {
       
       setIssues(mappedIssues);
       localStorage.setItem('jira_issues_cache', JSON.stringify(mappedIssues));
+      
+      if (myselfResponse.ok) {
+        const myselfData = await myselfResponse.json();
+        setUserProfile(myselfData);
+        localStorage.setItem('jira_user_profile', JSON.stringify(myselfData));
+      }
       
       const syncTime = new Date().toISOString();
       setLastSynced(syncTime);
@@ -83,6 +104,7 @@ export function useJiraIssues(oauthCredentials) {
 
   return {
     issues,
+    userProfile,
     loading,
     error,
     lastSynced,

@@ -8,7 +8,7 @@ import { LayoutGrid } from 'lucide-react';
 import './Dashboard.css';
 
 export function Dashboard({ credentials, onLogout }) {
-  const { issues, loading, error, lastSynced, refetch } = useJiraIssues(credentials);
+  const { issues, loading, error, lastSynced, refetch, userProfile } = useJiraIssues(credentials);
   
   const [view, setView] = useState(() => {
     return localStorage.getItem('jira_view_pref') || 'table';
@@ -31,15 +31,22 @@ export function Dashboard({ credentials, onLogout }) {
     const savedFilters = localStorage.getItem('jira_filters');
     if (savedFilters) {
       try {
-        return JSON.parse(savedFilters);
+        const parsed = JSON.parse(savedFilters);
+        if (typeof parsed.status === 'string') {
+          parsed.status = parsed.status ? [parsed.status] : [];
+        }
+        if (typeof parsed.project === 'string') {
+          parsed.project = parsed.project ? [parsed.project] : [];
+        }
+        return parsed;
       } catch (e) {
         console.error("Failed to parse saved filters", e);
       }
     }
     return {
       search: '',
-      status: '',
-      project: '',
+      status: [],
+      project: [],
       priority: '',
       showCompleted: true
     };
@@ -71,8 +78,8 @@ export function Dashboard({ credentials, onLogout }) {
       const q = filters.search.toLowerCase();
       
       if (q && !summary.includes(q) && !key.includes(q)) return false;
-      if (filters.status && status !== filters.status) return false;
-      if (filters.project && project !== filters.project) return false;
+      if (filters.status && filters.status.length > 0 && !filters.status.includes(status)) return false;
+      if (filters.project && filters.project.length > 0 && !filters.project.includes(project)) return false;
       
       return true;
     });
@@ -92,6 +99,7 @@ export function Dashboard({ credentials, onLogout }) {
         setFilters={setFilters}
         statuses={statuses}
         projects={projects}
+        userProfile={userProfile}
       />
       
       <main className="dashboard-content">
