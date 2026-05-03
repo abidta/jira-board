@@ -59,6 +59,8 @@ export function useJiraOAuth() {
     authUrl.searchParams.append('state', state);
     authUrl.searchParams.append('response_type', 'code');
     authUrl.searchParams.append('prompt', 'consent');
+    authUrl.searchParams.append('code_challenge', codeChallenge);
+    authUrl.searchParams.append('code_challenge_method', 'S256');
     
     window.location.href = authUrl.toString();
   };
@@ -76,21 +78,21 @@ export function useJiraOAuth() {
     }
 
     try {
-      const CLIENT_SECRET = import.meta.env.VITE_JIRA_CLIENT_SECRET;
+      // We no longer read VITE_JIRA_CLIENT_SECRET here!
+      // Instead, we send the code to our Firebase Cloud Function which securely holds the secret.
       
-      if (!CLIENT_SECRET) {
-        throw new Error("Missing VITE_JIRA_CLIENT_SECRET in .env file. Atlassian requires this for token exchange.");
-      }
-
       const body = {
-        grant_type: 'authorization_code',
-        client_id: CLIENT_ID,
-        client_secret: CLIENT_SECRET,
+        clientId: CLIENT_ID,
         code: code,
-        redirect_uri: REDIRECT_URI
+        redirectUri: REDIRECT_URI,
+        codeVerifier: codeVerifier
       };
 
-      const response = await fetch('https://auth.atlassian.com/oauth/token', {
+      // Vercel automatically hosts the API endpoint at /api/exchange
+      // Both in local development (using vercel dev) and in production!
+      const VERCEL_API_URL = '/api/exchange';
+
+      const response = await fetch(VERCEL_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -107,7 +109,7 @@ export function useJiraOAuth() {
           const text = await response.text();
           console.error("Token exchange raw error text:", text);
         }
-        throw new Error(errorData.error_description || errorData.error || 'Failed to exchange authorization code');
+        throw new Error(errorData.error_description || errorData.error || 'Failed to exchange authorization code via Firebase');
       }
 
       const tokens = await response.json();

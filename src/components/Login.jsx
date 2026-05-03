@@ -55,12 +55,8 @@ export function Login({ onLogin, isExchanging, authError, exchangeToken }) {
 
         <div className="login-form">
           <button type="button" className="login-btn oauth-btn" onClick={onLogin}>
-             Authorize with Atlassian
+             Connect Jira Workspace
           </button>
-          <div className="setup-hint">
-             Requires a local <code>.env</code> file containing <br />
-             <code>VITE_JIRA_CLIENT_ID</code> and <code>VITE_JIRA_CLIENT_SECRET</code>
-          </div>
         </div>
       </div>
     </div>
