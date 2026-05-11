@@ -1,6 +1,7 @@
 import React from 'react';
-import { Search, List, LayoutGrid, RefreshCw, LogOut } from 'lucide-react';
+import { Search, List, LayoutGrid, RefreshCw, LogOut, Gamepad2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 import { MultiSelect } from './MultiSelect';
 import './TopBar.css';
 
@@ -18,6 +19,7 @@ export function TopBar({
   projects,
   userProfile
 }) {
+  const navigate = useNavigate();
   const handleSearchChange = (e) => {
     setFilters(prev => ({ ...prev, search: e.target.value }));
   };
@@ -75,6 +77,14 @@ export function TopBar({
       </div>
 
       <div className="topbar-right">
+        <button
+          className="games-icon-btn"
+          onClick={() => navigate('/games')}
+          title="Game Arcade"
+        >
+          <Gamepad2 size={17} />
+        </button>
+
         <div className="view-toggle">
           <button 
             className={`view-btn ${view === 'table' ? 'active' : ''}`} 

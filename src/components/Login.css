@@ -131,3 +131,19 @@
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
+
+.games-btn {
+  background: rgba(0, 255, 106, 0.06);
+  border: 1px solid rgba(0, 255, 106, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 255, 106, 0.08);
+  color: #00ff6a;
+  font-size: 0.95rem;
+}
+
+.games-btn:hover {
+  background: rgba(0, 255, 106, 0.12);
+  border-color: rgba(0, 255, 106, 0.45);
+  box-shadow: 0 8px 25px rgba(0, 255, 106, 0.18);
+  color: #afffcc;
+  transform: translateY(-2px);
+}

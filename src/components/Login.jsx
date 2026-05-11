@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { LayoutGrid, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { LayoutGrid, AlertTriangle, Gamepad2 } from 'lucide-react';
 import './Login.css';
 
 export function Login({ onLogin, isExchanging, authError, exchangeToken }) {
+  const navigate = useNavigate();
   const [exchangeMsg, setExchangeMsg] = useState('Authenticating with Atlassian...');
 
   useEffect(() => {
@@ -56,6 +58,10 @@ export function Login({ onLogin, isExchanging, authError, exchangeToken }) {
         <div className="login-form">
           <button type="button" className="login-btn oauth-btn" onClick={onLogin}>
              Connect Jira Workspace
+          </button>
+          <button type="button" className="login-btn games-btn" onClick={() => navigate('/games')}>
+            <Gamepad2 size={18} />
+            Game Arcade
           </button>
         </div>
       </div>

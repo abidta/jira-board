@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy – Jira Dashboard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #e2e8f0;
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #818cf8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: #a5b4fc; }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .last-updated {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-bottom: 2.5rem;
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #c4b5fd;
+      margin-top: 2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    p, li {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+
+    ul {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    li { margin-bottom: 0.4rem; }
+
+    a { color: #818cf8; }
+    a:hover { color: #a5b4fc; }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      margin-top: 1rem;
+    }
+
+    .highlight {
+      background: rgba(129, 140, 248, 0.1);
+      border-left: 3px solid #818cf8;
+      padding: 1rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1.5rem 0;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      color: #64748b;
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="/" class="back-link">← Back to Jira Dashboard</a>
+
+    <h1>Privacy Policy</h1>
+    <p class="last-updated">Last updated: May 4, 2026</p>
+
+    <div class="card">
+      <h2>1. Introduction</h2>
+      <p>
+        Jira Dashboard ("we", "our", or "the app") is a web application that allows users to
+        view and manage their Atlassian Jira issues through a convenient dashboard interface.
+        This privacy policy explains how we handle your data when you use our service.
+      </p>
+
+      <h2>2. Data We Access</h2>
+      <p>When you connect your Jira account, we request the following permissions:</p>
+      <ul>
+        <li><strong>read:jira-work</strong> – To read your Jira issues, projects, and boards.</li>
+        <li><strong>read:jira-user</strong> – To read your basic Jira user profile (display name, avatar).</li>
+      </ul>
+      <p>We only request <strong>read-only</strong> access. We never modify, create, or delete any data in your Jira account.</p>
+
+      <h2>3. Data Storage</h2>
+      <div class="highlight">
+        <p><strong>We do not store your data on any server.</strong></p>
+      </div>
+      <p>
+        All Jira data is fetched directly from Atlassian's API and displayed in your browser.
+        Your OAuth access token is stored only in your browser's local storage and is never
+        sent to or stored on our servers. The only server-side operation we perform is a secure
+        token exchange during the login process, which does not retain any data.
+      </p>
+
+      <h2>4. Third-Party Services</h2>
+      <p>
+        This app interacts with <a href="https://www.atlassian.com/legal/privacy-policy" target="_blank">Atlassian's APIs</a>
+        to fetch your Jira data. We recommend reviewing Atlassian's own privacy policy for
+        details on how they handle your data.
+      </p>
+      <p>The app is hosted on <a href="https://vercel.com/legal/privacy-policy" target="_blank">Vercel</a>.</p>
+
+      <h2>5. Cookies</h2>
+      <p>
+        This app does not use cookies. Authentication state is managed through browser local
+        storage, which you can clear at any time by logging out or clearing your browser data.
+      </p>
+
+      <h2>6. Data Sharing</h2>
+      <p>
+        We do not sell, share, or transfer your data to any third parties. Your Jira data is
+        only used to display your dashboard within the app.
+      </p>
+
+      <h2>7. Security</h2>
+      <p>
+        We use industry-standard security practices including OAuth 2.0 with PKCE
+        (Proof Key for Code Exchange) for authentication, and all API communications are
+        encrypted via HTTPS. Your Atlassian client secret is stored securely on the server
+        side and is never exposed to the browser.
+      </p>
+
+      <h2>8. Your Rights</h2>
+      <p>You can at any time:</p>
+      <ul>
+        <li>Log out to remove your access token from local storage.</li>
+        <li>Revoke access by visiting your <a href="https://id.atlassian.com/manage-profile/apps" target="_blank">Atlassian Connected Apps</a> settings.</li>
+      </ul>
+
+      <h2>9. Contact</h2>
+      <p>
+        If you have questions about this privacy policy, please open an issue on our
+        <a href="https://github.com/abidta/jira-board" target="_blank">GitHub repository</a>.
+      </p>
+    </div>
+
+    <footer>
+      &copy; 2026 Jira Dashboard. All rights reserved.
+    </footer>
+  </div>
+</body>
+</html>
