@@ -7,6 +7,7 @@ import { Dashboard } from './components/Dashboard';
 // Lazy-load game pages — only fetched when the user navigates there
 const GamesHub = lazy(() => import('./pages/GamesHub'));
 const SnakeGame = lazy(() => import('./pages/games/SnakeGame'));
+const TetrisGame = lazy(() => import('./pages/games/TetrisGame'));
 
 function GamesFallback() {
   return (
@@ -77,6 +78,14 @@ function App() {
           element={
             <Suspense fallback={<GamesFallback />}>
               <SnakeGame />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/games/tetris"
+          element={
+            <Suspense fallback={<GamesFallback />}>
+              <TetrisGame />
             </Suspense>
           }
         />

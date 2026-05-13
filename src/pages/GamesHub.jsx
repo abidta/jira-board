@@ -18,7 +18,21 @@ const GAMES = [
       try { return JSON.parse(raw)?.bestScore ?? 0; } catch { return 0; }
     },
   },
-  // Future games can be added here
+  {
+    id: 'tetris',
+    path: '/games/tetris',
+    title: 'Tetris',
+    description: 'Stack, clear, survive. Rotate and drop tetrominoes to clear lines before the board fills up.',
+    icon: '🧱',
+    color: '#00F5FF',
+    colorDim: 'rgba(0, 245, 255, 0.08)',
+    colorBorder: 'rgba(0, 245, 255, 0.2)',
+    statsKey: 'tetris_stats',
+    statLabel: 'Best Score',
+    statExtractor: (raw) => {
+      try { return JSON.parse(raw)?.bestScore ?? 0; } catch { return 0; }
+    },
+  },
 ];
 
 function GameCard({ game }) {
