@@ -1,14 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useJiraIssues } from '../hooks/useJiraIssues';
+import { useJiraWorklogs } from '../hooks/useJiraWorklogs';
 import { TopBar } from './TopBar';
 import { FullTableView } from './FullTableView';
 import { CompactListView } from './CompactListView';
 import { IssueDetailModal } from './IssueDetailModal';
+import { Analytics } from './Analytics';
 import { LayoutGrid } from 'lucide-react';
 import './Dashboard.css';
 
 export function Dashboard({ credentials, onLogout }) {
   const { issues, loading, error, lastSynced, refetch, userProfile } = useJiraIssues(credentials);
+  const { worklogs, loading: worklogsLoading } = useJiraWorklogs(credentials, issues);
   
   const [view, setView] = useState(() => {
     return localStorage.getItem('jira_view_pref') || 'table';
@@ -126,7 +129,18 @@ export function Dashboard({ credentials, onLogout }) {
           </div>
         )}
 
-        {filteredIssues.length > 0 && (
+        {view === 'analytics' && issues.length > 0 && (
+          <div className="view-transition-wrapper analytics">
+            <Analytics
+              issues={issues}
+              worklogs={worklogs}
+              worklogsLoading={worklogsLoading}
+              userAccountId={userProfile?.accountId}
+            />
+          </div>
+        )}
+
+        {view !== 'analytics' && filteredIssues.length > 0 && (
           <div className={`view-transition-wrapper ${view}`}>
             {view === 'table' ? (
               <FullTableView 

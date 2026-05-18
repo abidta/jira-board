@@ -31,7 +31,7 @@ export function useJiraIssues(oauthCredentials) {
     }
 
     const jql = 'assignee=currentUser() ORDER BY updated DESC';
-    const fields = 'summary,status,priority,duedate,project,issuetype,updated,created,description,reporter,timetracking';
+    const fields = 'summary,status,priority,duedate,project,issuetype,updated,created,description,reporter,timetracking,subtasks';
     const maxResults = 100;
     
     const query = new URLSearchParams({

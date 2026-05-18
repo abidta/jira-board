@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, List, LayoutGrid, RefreshCw, LogOut, Gamepad2 } from 'lucide-react';
+import { Search, List, LayoutGrid, RefreshCw, LogOut, Gamepad2, BarChart3 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { MultiSelect } from './MultiSelect';
@@ -99,6 +99,13 @@ export function TopBar({
             title="Compact List View"
           >
             <List size={16} />
+          </button>
+          <button 
+            className={`view-btn ${view === 'analytics' ? 'active' : ''}`} 
+            onClick={() => setView('analytics')}
+            title="Analytics Dashboard"
+          >
+            <BarChart3 size={16} />
           </button>
         </div>
 
