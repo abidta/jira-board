@@ -569,3 +569,8 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* Light theme overrides */
+[data-theme="light"] .analytics-metric-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}

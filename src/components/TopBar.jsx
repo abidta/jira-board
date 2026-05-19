@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, List, LayoutGrid, RefreshCw, LogOut, Gamepad2, BarChart3 } from 'lucide-react';
+import { Search, List, LayoutGrid, RefreshCw, LogOut, Gamepad2, BarChart3, Sun, Moon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { MultiSelect } from './MultiSelect';
@@ -17,7 +17,9 @@ export function TopBar({
   setFilters,
   statuses,
   projects,
-  userProfile
+  userProfile,
+  theme,
+  onToggleTheme
 }) {
   const navigate = useNavigate();
   const handleSearchChange = (e) => {
@@ -89,6 +91,14 @@ export function TopBar({
       </div>
 
       <div className="topbar-right">
+        <button
+          className="theme-toggle-btn"
+          onClick={onToggleTheme}
+          title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        >
+          {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
+
         <button
           className="games-icon-btn"
           onClick={() => navigate('/games')}

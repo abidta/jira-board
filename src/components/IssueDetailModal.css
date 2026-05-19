@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(9, 10, 11, 0.7);
+  background-color: var(--modal-backdrop);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 1000;
@@ -20,7 +20,7 @@
 }
 
 .modal-card {
-  background-color: var(--surface-light);
+  background-color: var(--bg-secondary);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow-xl);
   border-radius: var(--radius-lg);
@@ -281,4 +281,17 @@
   .modal-main-content {
     padding: 1.5rem;
   }
+}
+
+/* Light theme overrides */
+[data-theme="light"] .modal-header {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .modal-footer {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .modal-sidebar {
+  background-color: rgba(0, 0, 0, 0.02);
 }

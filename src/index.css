@@ -23,6 +23,34 @@
 
   --font-body: 'Sora', sans-serif;
   --font-mono: 'DM Mono', monospace;
+
+  --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --modal-backdrop: rgba(9, 10, 11, 0.7);
+}
+
+/* ── Light Theme ─────────────────────────────────────────────────────── */
+[data-theme="light"] {
+  --bg-primary: #f4f5f7;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #ebedf0;
+
+  --text-primary: #172b4d;
+  --text-secondary: #5e6c84;
+  --text-muted: #97a0af;
+
+  --accent-blue: #0065ff;
+  --accent-blue-hover: #0052cc;
+  --accent-blue-transparent: rgba(0, 101, 255, 0.1);
+
+  --color-success: #1b855e;
+  --color-warning: #b25e00;
+  --color-danger: #de350b;
+  --color-info: #0065ff;
+
+  --border-color: #dfe1e6;
+
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --modal-backdrop: rgba(9, 30, 66, 0.54);
 }
 
 * {
@@ -38,6 +66,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {

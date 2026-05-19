@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LayoutGrid, AlertTriangle, Gamepad2 } from 'lucide-react';
+import { LayoutGrid, AlertTriangle, Gamepad2, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../hooks/useTheme';
 import './Login.css';
 
 export function Login({ onLogin, isExchanging, authError, exchangeToken }) {
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [exchangeMsg, setExchangeMsg] = useState('Authenticating with Atlassian...');
 
   useEffect(() => {
@@ -39,6 +41,9 @@ export function Login({ onLogin, isExchanging, authError, exchangeToken }) {
 
   return (
     <div className="login-wrapper">
+      <button className="login-theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}>
+        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+      </button>
       <div className="login-card">
         <div className="login-header">
           <div className="logo-icon">

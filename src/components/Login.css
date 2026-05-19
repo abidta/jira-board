@@ -3,7 +3,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  background: linear-gradient(135deg, var(--bg-primary) 0%, #1e1b4b 100%);
   padding: 1rem;
   position: relative;
   overflow: hidden;
@@ -72,7 +72,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 0.75rem;
-  color: #f8fafc;
+  color: var(--text-primary);
   letter-spacing: -0.025em;
 }
 
@@ -146,4 +146,62 @@
   box-shadow: 0 8px 25px rgba(0, 255, 106, 0.18);
   color: #afffcc;
   transform: translateY(-2px);
+}
+
+/* Light theme overrides for login */
+[data-theme="light"] .login-wrapper {
+  background: linear-gradient(135deg, #e8ecf4 0%, #d6dff0 100%);
+}
+
+[data-theme="light"] .login-wrapper::before {
+  background: radial-gradient(circle, rgba(0, 101, 255, 0.12) 0%, rgba(0,0,0,0) 70%);
+}
+
+[data-theme="light"] .login-wrapper::after {
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(0,0,0,0) 70%);
+}
+
+[data-theme="light"] .login-card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+}
+
+/* Floating theme toggle on login page */
+.login-theme-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  z-index: 10;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.login-theme-toggle:hover {
+  color: #f5a623;
+  background: rgba(245, 166, 35, 0.1);
+  border-color: rgba(245, 166, 35, 0.3);
+  transform: rotate(20deg);
+}
+
+[data-theme="light"] .login-theme-toggle {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="light"] .login-theme-toggle:hover {
+  color: #4F8EF7;
+  background: rgba(79, 142, 247, 0.08);
+  border-color: rgba(79, 142, 247, 0.3);
 }

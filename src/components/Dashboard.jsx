@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useJiraIssues } from '../hooks/useJiraIssues';
 import { useJiraWorklogs } from '../hooks/useJiraWorklogs';
+import { useTheme } from '../hooks/useTheme';
 import { TopBar } from './TopBar';
 import { FullTableView } from './FullTableView';
 import { CompactListView } from './CompactListView';
@@ -12,6 +13,7 @@ import './Dashboard.css';
 export function Dashboard({ credentials, onLogout, onSessionExpired }) {
   const { issues, loading, error, lastSynced, refetch, userProfile } = useJiraIssues(credentials, { onSessionExpired });
   const { worklogs, loading: worklogsLoading } = useJiraWorklogs(credentials, issues, { onSessionExpired });
+  const { theme, toggleTheme } = useTheme();
   
   const [view, setView] = useState(() => {
     return localStorage.getItem('jira_view_pref') || 'table';
@@ -124,6 +126,8 @@ export function Dashboard({ credentials, onLogout, onSessionExpired }) {
         statuses={statuses}
         projects={projects}
         userProfile={userProfile}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
       
       <main className="dashboard-content">
