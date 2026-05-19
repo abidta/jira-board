@@ -32,6 +32,14 @@ export function TopBar({
     setFilters(prev => ({ ...prev, project: newProjects }));
   };
 
+  const handleStatusModeChange = (newMode) => {
+    setFilters(prev => ({ ...prev, statusMode: newMode }));
+  };
+
+  const handleProjectModeChange = (newMode) => {
+    setFilters(prev => ({ ...prev, projectMode: newMode }));
+  };
+
   const syncText = lastSynced ? `Synced ${formatDistanceToNow(new Date(lastSynced), { addSuffix: true })}` : 'Not synced yet';
 
   return (
@@ -64,6 +72,8 @@ export function TopBar({
             selected={filters.status || []}
             onChange={handleStatusChange}
             placeholder="All Statuses"
+            mode={filters.statusMode || 'include'}
+            onModeChange={handleStatusModeChange}
           />
           
           <MultiSelect 
@@ -72,6 +82,8 @@ export function TopBar({
             onChange={handleProjectChange}
             placeholder="All Projects"
             className="hide-mobile"
+            mode={filters.projectMode || 'include'}
+            onModeChange={handleProjectModeChange}
           />
         </div>
       </div>

@@ -41,7 +41,7 @@ function JiraApp() {
   return (
     <div className="app-container">
       {isAuthenticated && credentials.cloudId ? (
-        <Dashboard credentials={credentials} onLogout={logout} />
+        <Dashboard credentials={credentials} onLogout={logout} onSessionExpired={initiateLogin} />
       ) : (
         <Login
           onLogin={initiateLogin}

@@ -5,7 +5,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
  * that has time logged, INCLUDING sub-tasks. Each worklog entry contains
  * a `started` date and `timeSpentSeconds`, giving us accurate per-day time data.
  */
-export function useJiraWorklogs(oauthCredentials, issues) {
+export function useJiraWorklogs(oauthCredentials, issues, { onSessionExpired } = {}) {
   const [worklogs, setWorklogs] = useState(() => {
     const cached = localStorage.getItem('jira_worklogs_cache');
     return cached ? JSON.parse(cached) : [];
@@ -17,8 +17,14 @@ export function useJiraWorklogs(oauthCredentials, issues) {
     if (!oauthCredentials?.accessToken || !oauthCredentials?.cloudId) return;
     if (!issues || issues.length === 0) return;
 
-    // Check token expiry
-    if (oauthCredentials.expiresAt && Date.now() > oauthCredentials.expiresAt) return;
+    // Check token expiry — auto-redirect to Atlassian login
+    if (oauthCredentials.expiresAt && Date.now() > oauthCredentials.expiresAt) {
+      if (onSessionExpired) {
+        onSessionExpired();
+      }
+      return;
+    }
+
 
     setLoading(true);
     const { accessToken, cloudId } = oauthCredentials;
@@ -102,7 +108,7 @@ export function useJiraWorklogs(oauthCredentials, issues) {
     } finally {
       setLoading(false);
     }
-  }, [oauthCredentials, issues]);
+  }, [oauthCredentials, issues, onSessionExpired]);
 
   // Auto-fetch when issues are available (once per mount)
   useEffect(() => {

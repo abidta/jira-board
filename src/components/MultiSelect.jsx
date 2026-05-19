@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Ban } from 'lucide-react';
 import './MultiSelect.css';
 
-export function MultiSelect({ options, selected, onChange, placeholder, className }) {
+export function MultiSelect({ options, selected, onChange, placeholder, className, mode = 'include', onModeChange }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -23,16 +23,18 @@ export function MultiSelect({ options, selected, onChange, placeholder, classNam
     onChange(updated);
   };
 
+  const isExcludeMode = mode === 'exclude';
+
   const displayText = selected.length === 0 
     ? placeholder 
     : selected.length === 1 
-      ? selected[0] 
-      : `${selected.length} selected`;
+      ? `${isExcludeMode ? '≠ ' : ''}${selected[0]}` 
+      : `${isExcludeMode ? '≠ ' : ''}${selected.length} selected`;
 
   return (
     <div className={`multi-select-container ${className || ''}`} ref={dropdownRef}>
       <button 
-        className={`multi-select-trigger ${selected.length > 0 ? 'active' : ''}`}
+        className={`multi-select-trigger ${selected.length > 0 ? (isExcludeMode ? 'active exclude' : 'active') : ''}`}
         onClick={() => setIsOpen(!isOpen)}
         type="button"
       >
@@ -42,6 +44,30 @@ export function MultiSelect({ options, selected, onChange, placeholder, classNam
 
       {isOpen && (
         <div className="multi-select-dropdown">
+          {/* Mode toggle header */}
+          {onModeChange && (
+            <div className="multi-select-mode-toggle">
+              <button
+                type="button"
+                className={`mode-btn ${!isExcludeMode ? 'active' : ''}`}
+                onClick={() => onModeChange('include')}
+                title="Include: show only selected"
+              >
+                <Check size={12} />
+                <span>Is</span>
+              </button>
+              <button
+                type="button"
+                className={`mode-btn ${isExcludeMode ? 'active' : ''}`}
+                onClick={() => onModeChange('exclude')}
+                title="Exclude: hide selected"
+              >
+                <Ban size={12} />
+                <span>Is not</span>
+              </button>
+            </div>
+          )}
+
           {options.length === 0 ? (
             <div className="multi-select-empty">No options</div>
           ) : (
@@ -50,11 +76,11 @@ export function MultiSelect({ options, selected, onChange, placeholder, classNam
               return (
                 <div 
                   key={option} 
-                  className={`multi-select-item ${isSelected ? 'selected' : ''}`}
+                  className={`multi-select-item ${isSelected ? (isExcludeMode ? 'selected exclude' : 'selected') : ''}`}
                   onClick={() => toggleOption(option)}
                 >
-                  <div className={`checkbox ${isSelected ? 'checked' : ''}`}>
-                    {isSelected && <Check size={12} />}
+                  <div className={`checkbox ${isSelected ? (isExcludeMode ? 'checked exclude' : 'checked') : ''}`}>
+                    {isSelected && (isExcludeMode ? <Ban size={10} /> : <Check size={12} />)}
                   </div>
                   <span className="truncate" title={option}>{option}</span>
                 </div>

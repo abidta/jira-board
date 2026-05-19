@@ -9,9 +9,9 @@ import { Analytics } from './Analytics';
 import { LayoutGrid } from 'lucide-react';
 import './Dashboard.css';
 
-export function Dashboard({ credentials, onLogout }) {
-  const { issues, loading, error, lastSynced, refetch, userProfile } = useJiraIssues(credentials);
-  const { worklogs, loading: worklogsLoading } = useJiraWorklogs(credentials, issues);
+export function Dashboard({ credentials, onLogout, onSessionExpired }) {
+  const { issues, loading, error, lastSynced, refetch, userProfile } = useJiraIssues(credentials, { onSessionExpired });
+  const { worklogs, loading: worklogsLoading } = useJiraWorklogs(credentials, issues, { onSessionExpired });
   
   const [view, setView] = useState(() => {
     return localStorage.getItem('jira_view_pref') || 'table';
@@ -41,6 +41,9 @@ export function Dashboard({ credentials, onLogout }) {
         if (typeof parsed.project === 'string') {
           parsed.project = parsed.project ? [parsed.project] : [];
         }
+        // Ensure mode fields exist for backwards compatibility
+        if (!parsed.statusMode) parsed.statusMode = 'include';
+        if (!parsed.projectMode) parsed.projectMode = 'include';
         return parsed;
       } catch (e) {
         console.error("Failed to parse saved filters", e);
@@ -49,7 +52,9 @@ export function Dashboard({ credentials, onLogout }) {
     return {
       search: '',
       status: [],
+      statusMode: 'include',
       project: [],
+      projectMode: 'include',
       priority: '',
       showCompleted: true
     };
@@ -81,8 +86,24 @@ export function Dashboard({ credentials, onLogout }) {
       const q = filters.search.toLowerCase();
       
       if (q && !summary.includes(q) && !key.includes(q)) return false;
-      if (filters.status && filters.status.length > 0 && !filters.status.includes(status)) return false;
-      if (filters.project && filters.project.length > 0 && !filters.project.includes(project)) return false;
+      
+      // Status filter — supports include and exclude modes
+      if (filters.status && filters.status.length > 0) {
+        if (filters.statusMode === 'exclude') {
+          if (filters.status.includes(status)) return false;
+        } else {
+          if (!filters.status.includes(status)) return false;
+        }
+      }
+      
+      // Project filter — supports include and exclude modes
+      if (filters.project && filters.project.length > 0) {
+        if (filters.projectMode === 'exclude') {
+          if (filters.project.includes(project)) return false;
+        } else {
+          if (!filters.project.includes(project)) return false;
+        }
+      }
       
       return true;
     });

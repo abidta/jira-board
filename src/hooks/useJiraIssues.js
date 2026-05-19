@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 
-export function useJiraIssues(oauthCredentials) {
+export function useJiraIssues(oauthCredentials, { onSessionExpired } = {}) {
   const [issues, setIssues] = useState(() => {
     const cached = localStorage.getItem('jira_issues_cache');
     return cached ? JSON.parse(cached) : [];
@@ -23,8 +23,13 @@ export function useJiraIssues(oauthCredentials) {
 
     const { accessToken, cloudId } = oauthCredentials;
     
-    // Check if token is expired
+    // Check if token is expired — auto-redirect to Atlassian login
     if (oauthCredentials.expiresAt && Date.now() > oauthCredentials.expiresAt) {
+       if (onSessionExpired) {
+         setLoading(false);
+         onSessionExpired();
+         return;
+       }
        setError("Your session has expired. Please log out and reconnect with Atlassian.");
        setLoading(false);
        return;
@@ -64,6 +69,10 @@ export function useJiraIssues(oauthCredentials) {
 
       if (!response.ok) {
         if (response.status === 401) {
+          if (onSessionExpired) {
+            onSessionExpired();
+            return;
+          }
           throw new Error('Authentication failed or token expired. Please log out and reconnect.');
         }
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
@@ -94,7 +103,7 @@ export function useJiraIssues(oauthCredentials) {
     } finally {
       setLoading(false);
     }
-  }, [oauthCredentials]);
+  }, [oauthCredentials, onSessionExpired]);
 
   useEffect(() => {
     if (issues.length === 0 && oauthCredentials) {
