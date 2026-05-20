@@ -44,6 +44,12 @@ export function useJiraOAuth() {
       return;
     }
 
+    // Clear old/expired credentials BEFORE redirecting.
+    // This ensures the callback lands on the Login component (which handles
+    // code exchange) instead of Dashboard (which would just 401 again).
+    localStorage.removeItem('jira_oauth');
+    setCredentials(null);
+
     const state = generateRandomString(32);
     const codeVerifier = generateRandomString(64);
     const codeChallenge = await generateCodeChallenge(codeVerifier);
@@ -165,11 +171,15 @@ export function useJiraOAuth() {
     setCredentials(null);
   };
 
+  // Consider authenticated only if we have credentials AND the token hasn't expired
+  const isAuthenticated = !!credentials && 
+    (!credentials.expiresAt || Date.now() < credentials.expiresAt);
+
   return { 
     credentials, 
     initiateLogin, 
     logout, 
-    isAuthenticated: !!credentials,
+    isAuthenticated,
     exchangeToken,
     isExchanging,
     authError
