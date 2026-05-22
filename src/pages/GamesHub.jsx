@@ -33,6 +33,24 @@ const GAMES = [
       try { return JSON.parse(raw)?.bestScore ?? 0; } catch { return 0; }
     },
   },
+  {
+    id: 'sudoku',
+    path: '/games/sudoku',
+    title: 'Sudoku',
+    description: 'Fill the grid with numbers — no repeats in any row, column, or box. Pure logic.',
+    icon: '🔢',
+    color: '#FFB703',
+    colorDim: 'rgba(255, 183, 3, 0.08)',
+    colorBorder: 'rgba(255, 183, 3, 0.2)',
+    statsKey: 'sudoku_scores',
+    statLabel: 'Games Won',
+    statExtractor: (raw) => {
+      try {
+        const data = JSON.parse(raw);
+        return Object.values(data).reduce((sum, d) => sum + (d.won || 0), 0);
+      } catch { return 0; }
+    },
+  },
 ];
 
 function GameCard({ game }) {

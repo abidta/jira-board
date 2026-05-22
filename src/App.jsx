@@ -8,6 +8,7 @@ import { Dashboard } from './components/Dashboard';
 const GamesHub = lazy(() => import('./pages/GamesHub'));
 const SnakeGame = lazy(() => import('./pages/games/SnakeGame'));
 const TetrisGame = lazy(() => import('./pages/games/TetrisGame'));
+const SudokuGame = lazy(() => import('./pages/games/SudokuGame'));
 
 function GamesFallback() {
   return (
@@ -86,6 +87,14 @@ function App() {
           element={
             <Suspense fallback={<GamesFallback />}>
               <TetrisGame />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/games/sudoku"
+          element={
+            <Suspense fallback={<GamesFallback />}>
+              <SudokuGame />
             </Suspense>
           }
         />

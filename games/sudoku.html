@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sudoku — Numbers, Logic, Peace of Mind</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF6EC;
+    --bg-shade: #F3EEDF;
+    --surface: #FFFFFF;
+    --ink: #1A1A2E;
+    --ink-soft: #6B6B7E;
+    --primary: #2563EB;
+    --primary-soft: #DBEAFE;
+    --accent: #FFE9B5;
+    --accent-strong: #FFB703;
+    --success: #06A77D;
+    --error: #E63946;
+    --error-soft: #FECDD3;
+    --border: #1A1A2E;
+    --border-soft: #C9C5BA;
+    --highlight: #EFEADC;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(26,26,46,0.05) 1px, transparent 0);
+    background-size: 22px 22px;
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 28px 16px 48px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  /* ---------- HEADER ---------- */
+  header {
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(54px, 9vw, 92px);
+    font-weight: 800;
+    font-variation-settings: 'opsz' 144;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+  }
+
+  h1 .o {
+    color: var(--error);
+    font-style: italic;
+    display: inline-block;
+    transform: translateY(2px);
+  }
+
+  .tagline {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+
+  /* ---------- DIFFICULTY ---------- */
+  .difficulty-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .diff-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 10px 18px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    border-radius: 0;
+  }
+  .diff-btn:hover {
+    background: var(--accent);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--border);
+  }
+  .diff-btn.active {
+    background: var(--ink);
+    color: var(--bg);
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--error);
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .game-area {
+    display: grid;
+    grid-template-columns: auto 320px;
+    gap: 36px;
+    justify-content: center;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .game-area {
+      grid-template-columns: 1fr;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+  }
+
+  /* ---------- STATS BAR ---------- */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin-bottom: 16px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 6px;
+    border-right: 1px solid var(--border-soft);
+  }
+  .stat:last-child { border-right: none; }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 2px;
+  }
+  .stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 600;
+    font-variation-settings: 'opsz' 36;
+    letter-spacing: -0.01em;
+  }
+  .stat-value.danger { color: var(--error); }
+
+  /* ---------- GRID ---------- */
+  .grid-wrapper {
+    position: relative;
+    background: var(--surface);
+    padding: 8px;
+    border: 3px solid var(--border);
+    box-shadow: 8px 8px 0 var(--border);
+    display: inline-block;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 3px;
+    background: var(--border);
+    width: min(520px, 86vw);
+    aspect-ratio: 1;
+  }
+
+  .box {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border-soft);
+  }
+
+  .cell {
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-size: clamp(20px, 4.2vw, 30px);
+    font-weight: 600;
+    font-variation-settings: 'opsz' 36;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.08s ease;
+  }
+  .cell.fixed { color: var(--ink); }
+  .cell.user { color: var(--primary); }
+  .cell.error { color: var(--error); background: var(--error-soft) !important; }
+  .cell.hint-revealed { color: var(--success); }
+
+  .cell.peer { background: var(--highlight); }
+  .cell.same-value { background: var(--accent); }
+  .cell.selected { background: var(--primary-soft); }
+  .cell:not(.selected):hover { background: var(--accent); }
+
+  .cell.pulse {
+    animation: pulse 0.6s ease;
+  }
+  @keyframes pulse {
+    0% { background: var(--success); color: white; }
+    100% { background: var(--surface); }
+  }
+
+  .notes-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    width: 100%;
+    height: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(8px, 1.2vw, 10px);
+    color: var(--ink-soft);
+    padding: 2px;
+  }
+  .note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---------- CONTROLS ---------- */
+  .controls-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .number-pad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+
+  .num-btn {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    font-variation-settings: 'opsz' 36;
+    padding: 14px 0;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.1s ease;
+    position: relative;
+  }
+  .num-btn:hover { background: var(--accent); }
+  .num-btn:active { transform: scale(0.95); }
+  .num-btn.exhausted {
+    color: var(--border-soft);
+    background: var(--bg-shade);
+    cursor: not-allowed;
+  }
+
+  .action-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+  .action-btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 13px 8px;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .action-btn:hover { background: var(--accent); }
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn.primary { background: var(--ink); color: var(--bg); }
+  .action-btn.primary:hover { background: var(--primary); color: white; }
+  .action-btn.active {
+    background: var(--accent-strong);
+    box-shadow: inset 0 0 0 2px var(--border);
+  }
+
+  /* ---------- SCOREBOARD ---------- */
+  .scoreboard {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    padding: 14px 16px 6px;
+  }
+
+  .scoreboard h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 800;
+    font-style: italic;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+    letter-spacing: -0.01em;
+  }
+
+  .score-row {
+    display: grid;
+    grid-template-columns: 1fr 70px 50px;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--border-soft);
+  }
+  .score-row:last-child { border-bottom: none; }
+  .score-row.head {
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 6px;
+  }
+  .score-row.head .score-diff,
+  .score-row.head .score-time,
+  .score-row.head .score-games {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--ink-soft);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .score-diff {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  .score-diff.current {
+    color: var(--error);
+    font-weight: 700;
+  }
+  .score-diff.current::before {
+    content: "▸ ";
+    color: var(--error);
+  }
+  .score-time, .score-games {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    text-align: right;
+    font-size: 15px;
+  }
+
+  /* ---------- KEY HINTS ---------- */
+  .key-hints {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.7;
+  }
+  .key-hints kbd {
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-bottom-width: 2px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: inherit;
+    color: var(--ink);
+  }
+
+  /* ---------- LOADING ---------- */
+  .loading {
+    position: absolute;
+    inset: 8px;
+    background: rgba(250, 246, 236, 0.92);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 5;
+  }
+  .loading.show { display: flex; }
+  .loading-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--ink-soft);
+  }
+  .loading-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    background: var(--ink);
+    border-radius: 50%;
+    margin: 0 3px;
+    animation: bounce 0.9s infinite ease-in-out;
+  }
+  .loading-dot:nth-child(2) { animation-delay: 0.15s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  /* ---------- MODAL ---------- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 46, 0.55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    backdrop-filter: blur(6px);
+    padding: 16px;
+  }
+  .overlay.show { display: flex; }
+
+  .modal {
+    background: var(--bg);
+    border: 3px solid var(--border);
+    box-shadow: 12px 12px 0 var(--error);
+    padding: 36px 32px 28px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    animation: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes pop {
+    from { transform: scale(0.7) translateY(20px); opacity: 0; }
+    to { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 8px; right: 8px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    width: 32px; height: 32px;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--ink); }
+
+  .modal h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 52px;
+    font-weight: 800;
+    font-style: italic;
+    line-height: 0.9;
+    margin-bottom: 8px;
+    letter-spacing: -0.03em;
+  }
+  .modal h2.win { color: var(--success); }
+  .modal h2.lose { color: var(--error); }
+
+  .modal p {
+    color: var(--ink-soft);
+    margin-bottom: 22px;
+    font-size: 14px;
+  }
+
+  .modal-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 22px;
+  }
+  .modal-stat {
+    background: var(--surface);
+    padding: 12px 6px;
+    border: 2px solid var(--border);
+  }
+  .modal-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .modal-stat-value {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  .modal-stat-value.best { color: var(--success); }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    text-align: center;
+    margin-top: 32px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  @media (max-width: 480px) {
+    .stat-value { font-size: 18px; }
+    .stat-label { font-size: 8px; }
+    h1 { font-size: 56px; }
+    .num-btn { font-size: 22px; padding: 12px 0; }
+    .action-btn { font-size: 10px; padding: 11px 4px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>SUD<span class="o">O</span>KU</h1>
+    <p class="tagline">— Numbers · Logic · Peace of Mind —</p>
+  </header>
+
+  <div class="difficulty-row" id="diffRow">
+    <button class="diff-btn active" data-diff="easy">Easy</button>
+    <button class="diff-btn" data-diff="medium">Medium</button>
+    <button class="diff-btn" data-diff="hard">Hard</button>
+    <button class="diff-btn" data-diff="expert">Expert</button>
+    <button class="diff-btn" data-diff="legend">Legend</button>
+  </div>
+
+  <div class="game-area">
+    <div>
+      <div class="stats-bar">
+        <div class="stat">
+          <div class="stat-label">Time</div>
+          <div class="stat-value" id="timeVal">00:00</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Mistakes</div>
+          <div class="stat-value" id="errVal">0/3</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Mode</div>
+          <div class="stat-value" id="modeVal">Easy</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Hints</div>
+          <div class="stat-value" id="hintVal">3</div>
+        </div>
+      </div>
+
+      <div class="grid-wrapper">
+        <div class="grid" id="grid"></div>
+        <div class="loading" id="loading">
+          <div>
+            <span class="loading-dot"></span>
+            <span class="loading-dot"></span>
+            <span class="loading-dot"></span>
+          </div>
+          <div class="loading-text">Crafting a puzzle</div>
+        </div>
+      </div>
+
+      <div class="key-hints">
+        <kbd>1</kbd>–<kbd>9</kbd> place &nbsp; <kbd>Del</kbd> erase &nbsp; <kbd>N</kbd> notes &nbsp; <kbd>H</kbd> hint &nbsp; <kbd>←↑↓→</kbd> move
+      </div>
+    </div>
+
+    <div class="controls-panel">
+      <div class="number-pad" id="numPad"></div>
+      <div class="action-row">
+        <button class="action-btn" id="notesBtn">✎ Notes <span style="opacity:0.5;font-size:10px;">OFF</span></button>
+        <button class="action-btn" id="eraseBtn">⌫ Erase</button>
+        <button class="action-btn" id="hintBtn">💡 Hint</button>
+        <button class="action-btn primary" id="newBtn">↻ New Game</button>
+      </div>
+
+      <div class="scoreboard">
+        <h2>Scoreboard</h2>
+        <div class="score-row head">
+          <div class="score-diff">Level</div>
+          <div class="score-time">Best</div>
+          <div class="score-games">Won</div>
+        </div>
+        <div id="scoreList"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Pure HTML · CSS · JS — No frameworks</footer>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('overlay').classList.remove('show')">×</button>
+    <h2 id="modalTitle" class="win">Solved!</h2>
+    <p id="modalText">Beautiful work.</p>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="modal-stat-label">Time</div>
+        <div class="modal-stat-value" id="modalTime">00:00</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-label">Mistakes</div>
+        <div class="modal-stat-value" id="modalErrors">0</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-label">Hints</div>
+        <div class="modal-stat-value" id="modalHints">0</div>
+      </div>
+    </div>
+    <button class="action-btn primary" style="width:100%;" id="modalNewBtn">↻ New Puzzle</button>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// SUDOKU GENERATOR
+// ============================================================
+
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function emptyBoard() {
+  return Array.from({length: 9}, () => Array(9).fill(0));
+}
+
+function isValid(board, row, col, num) {
+  for (let i = 0; i < 9; i++) {
+    if (board[row][i] === num) return false;
+    if (board[i][col] === num) return false;
+  }
+  const br = Math.floor(row/3)*3, bc = Math.floor(col/3)*3;
+  for (let r = br; r < br+3; r++) {
+    for (let c = bc; c < bc+3; c++) {
+      if (board[r][c] === num) return false;
+    }
+  }
+  return true;
+}
+
+function fillBoard(board) {
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      if (board[row][col] === 0) {
+        const nums = shuffle([1,2,3,4,5,6,7,8,9]);
+        for (const num of nums) {
+          if (isValid(board, row, col, num)) {
+            board[row][col] = num;
+            if (fillBoard(board)) return true;
+            board[row][col] = 0;
+          }
+        }
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+// Count solutions up to limit, using MRV heuristic for speed
+function countSolutions(board, limit = 2) {
+  let count = 0;
+  function search() {
+    if (count >= limit) return;
+    let bestR = -1, bestC = -1, bestOpts = null, bestLen = 10;
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        if (board[r][c] === 0) {
+          const opts = [];
+          for (let n = 1; n <= 9; n++) {
+            if (isValid(board, r, c, n)) opts.push(n);
+          }
+          if (opts.length < bestLen) {
+            bestLen = opts.length;
+            bestR = r; bestC = c; bestOpts = opts;
+            if (bestLen === 0) return;
+          }
+        }
+      }
+    }
+    if (bestR === -1) { count++; return; }
+    for (const num of bestOpts) {
+      board[bestR][bestC] = num;
+      search();
+      board[bestR][bestC] = 0;
+      if (count >= limit) return;
+    }
+  }
+  search();
+  return count;
+}
+
+function generatePuzzle(difficulty) {
+  const board = emptyBoard();
+  fillBoard(board);
+  const solution = board.map(r => [...r]);
+
+  // Target clue counts per difficulty
+  const targets = {
+    easy: 42,
+    medium: 34,
+    hard: 30,
+    expert: 26,
+    legend: 23
+  };
+  const targetClues = targets[difficulty];
+
+  const positions = [];
+  for (let i = 0; i < 81; i++) positions.push(i);
+  shuffle(positions);
+
+  let clues = 81;
+  for (const pos of positions) {
+    if (clues <= targetClues) break;
+    const r = Math.floor(pos/9), c = pos % 9;
+    const val = board[r][c];
+    if (val === 0) continue;
+    board[r][c] = 0;
+
+    // Check uniqueness on a copy
+    const test = board.map(row => [...row]);
+    if (countSolutions(test, 2) !== 1) {
+      board[r][c] = val; // restore
+    } else {
+      clues--;
+    }
+  }
+
+  return { puzzle: board, solution, clues };
+}
+
+// ============================================================
+// GAME STATE
+// ============================================================
+
+const state = {
+  difficulty: 'easy',
+  puzzle: null,
+  solution: null,
+  board: null,
+  fixed: null,
+  notes: null,       // 9x9 of Sets
+  selected: null,
+  errors: 0,
+  maxErrors: 3,
+  hintsLeft: 3,
+  hintsUsed: 0,
+  noteMode: false,
+  timer: 0,
+  timerInterval: null,
+  startTime: null,
+  gameOver: false,
+  won: false,
+};
+
+const scores = {
+  easy:   { best: null, won: 0 },
+  medium: { best: null, won: 0 },
+  hard:   { best: null, won: 0 },
+  expert: { best: null, won: 0 },
+  legend: { best: null, won: 0 },
+};
+
+// ============================================================
+// DOM REFERENCES
+// ============================================================
+
+const grid = document.getElementById('grid');
+const numPad = document.getElementById('numPad');
+const timeVal = document.getElementById('timeVal');
+const errVal = document.getElementById('errVal');
+const modeVal = document.getElementById('modeVal');
+const hintVal = document.getElementById('hintVal');
+const loading = document.getElementById('loading');
+const scoreList = document.getElementById('scoreList');
+const notesBtn = document.getElementById('notesBtn');
+const overlay = document.getElementById('overlay');
+
+const cellEls = Array.from({length: 9}, () => Array(9).fill(null));
+
+// ============================================================
+// BUILD GRID DOM
+// ============================================================
+
+function buildGrid() {
+  grid.innerHTML = '';
+  for (let boxRow = 0; boxRow < 3; boxRow++) {
+    for (let boxCol = 0; boxCol < 3; boxCol++) {
+      const box = document.createElement('div');
+      box.className = 'box';
+      for (let cellRow = 0; cellRow < 3; cellRow++) {
+        for (let cellCol = 0; cellCol < 3; cellCol++) {
+          const r = boxRow * 3 + cellRow;
+          const c = boxCol * 3 + cellCol;
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.addEventListener('click', () => selectCell(r, c));
+          box.appendChild(cell);
+          cellEls[r][c] = cell;
+        }
+      }
+      grid.appendChild(box);
+    }
+  }
+}
+
+function buildNumPad() {
+  numPad.innerHTML = '';
+  for (let n = 1; n <= 9; n++) {
+    const btn = document.createElement('button');
+    btn.className = 'num-btn';
+    btn.textContent = n;
+    btn.dataset.num = n;
+    btn.addEventListener('click', () => inputNumber(n));
+    numPad.appendChild(btn);
+  }
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+
+function render() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = cellEls[r][c];
+      const val = state.board[r][c];
+      const fixed = state.fixed[r][c];
+
+      cell.classList.remove('selected', 'peer', 'same-value', 'fixed', 'user', 'error');
+      cell.innerHTML = '';
+
+      if (val !== 0) {
+        cell.textContent = val;
+        cell.classList.add(fixed ? 'fixed' : 'user');
+        if (!fixed && val !== state.solution[r][c]) {
+          cell.classList.add('error');
+        }
+      } else if (state.notes[r][c].size > 0) {
+        const ng = document.createElement('div');
+        ng.className = 'notes-grid';
+        for (let i = 1; i <= 9; i++) {
+          const note = document.createElement('div');
+          note.className = 'note';
+          if (state.notes[r][c].has(i)) note.textContent = i;
+          ng.appendChild(note);
+        }
+        cell.appendChild(ng);
+      }
+
+      if (state.selected) {
+        const [sr, sc] = state.selected;
+        const selVal = state.board[sr][sc];
+        if (r === sr && c === sc) {
+          cell.classList.add('selected');
+        } else if (r === sr || c === sc ||
+                   (Math.floor(r/3) === Math.floor(sr/3) && Math.floor(c/3) === Math.floor(sc/3))) {
+          cell.classList.add('peer');
+        }
+        if (selVal !== 0 && val === selVal && !(r === sr && c === sc)) {
+          cell.classList.remove('peer');
+          cell.classList.add('same-value');
+        }
+      }
+    }
+  }
+
+  // Number pad exhausted
+  const counts = Array(10).fill(0);
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (state.board[r][c] !== 0 && state.board[r][c] === state.solution[r][c]) {
+        counts[state.board[r][c]]++;
+      }
+    }
+  }
+  Array.from(numPad.children).forEach(btn => {
+    const n = parseInt(btn.dataset.num);
+    btn.classList.toggle('exhausted', counts[n] >= 9);
+  });
+
+  // Stats
+  errVal.textContent = state.errors + '/' + state.maxErrors;
+  errVal.classList.toggle('danger', state.errors >= 2);
+  modeVal.textContent = state.difficulty[0].toUpperCase() + state.difficulty.slice(1);
+  hintVal.textContent = state.hintsLeft;
+
+  notesBtn.classList.toggle('active', state.noteMode);
+  notesBtn.innerHTML = state.noteMode
+    ? '✎ Notes <span style="opacity:0.7;font-size:10px;">ON</span>'
+    : '✎ Notes <span style="opacity:0.5;font-size:10px;">OFF</span>';
+
+  renderScoreboard();
+}
+
+function renderScoreboard() {
+  scoreList.innerHTML = '';
+  const order = ['easy', 'medium', 'hard', 'expert', 'legend'];
+  order.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    const best = scores[d].best !== null ? formatTime(scores[d].best) : '—';
+    const isCurrent = d === state.difficulty;
+    row.innerHTML = `
+      <div class="score-diff${isCurrent ? ' current' : ''}">${d}</div>
+      <div class="score-time">${best}</div>
+      <div class="score-games">${scores[d].won}</div>
+    `;
+    scoreList.appendChild(row);
+  });
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec/60).toString().padStart(2, '0');
+  const s = (sec%60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+
+function selectCell(r, c) {
+  if (state.gameOver) return;
+  state.selected = [r, c];
+  render();
+}
+
+function inputNumber(n) {
+  if (state.gameOver || !state.selected) return;
+  const [r, c] = state.selected;
+  if (state.fixed[r][c]) return;
+
+  if (state.noteMode) {
+    if (state.board[r][c] !== 0) return;
+    if (state.notes[r][c].has(n)) state.notes[r][c].delete(n);
+    else state.notes[r][c].add(n);
+  } else {
+    state.notes[r][c].clear();
+    if (state.board[r][c] === n) {
+      state.board[r][c] = 0;
+    } else {
+      state.board[r][c] = n;
+      if (n !== state.solution[r][c]) {
+        state.errors++;
+        if (state.errors >= state.maxErrors) {
+          render();
+          setTimeout(() => endGame(false), 250);
+          return;
+        }
+      } else {
+        clearNotesPeers(r, c, n);
+        cellEls[r][c].classList.add('pulse');
+        setTimeout(() => cellEls[r][c].classList.remove('pulse'), 600);
+        if (isComplete()) {
+          render();
+          setTimeout(() => endGame(true), 350);
+          return;
+        }
+      }
+    }
+  }
+  render();
+}
+
+function clearNotesPeers(r, c, n) {
+  for (let i = 0; i < 9; i++) {
+    state.notes[r][i].delete(n);
+    state.notes[i][c].delete(n);
+  }
+  const br = Math.floor(r/3)*3, bc = Math.floor(c/3)*3;
+  for (let rr = br; rr < br+3; rr++) {
+    for (let cc = bc; cc < bc+3; cc++) {
+      state.notes[rr][cc].delete(n);
+    }
+  }
+}
+
+function eraseCell() {
+  if (state.gameOver || !state.selected) return;
+  const [r, c] = state.selected;
+  if (state.fixed[r][c]) return;
+  state.board[r][c] = 0;
+  state.notes[r][c].clear();
+  render();
+}
+
+function useHint() {
+  if (state.gameOver || state.hintsLeft <= 0) return;
+  const candidates = [];
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (!state.fixed[r][c] && state.board[r][c] !== state.solution[r][c]) {
+        candidates.push([r, c]);
+      }
+    }
+  }
+  if (candidates.length === 0) return;
+
+  // Prefer current selection if it qualifies
+  let target = null;
+  if (state.selected) {
+    const [sr, sc] = state.selected;
+    if (!state.fixed[sr][sc] && state.board[sr][sc] !== state.solution[sr][sc]) {
+      target = [sr, sc];
+    }
+  }
+  if (!target) target = candidates[Math.floor(Math.random() * candidates.length)];
+
+  const [r, c] = target;
+  state.board[r][c] = state.solution[r][c];
+  state.notes[r][c].clear();
+  state.fixed[r][c] = true;
+  state.hintsLeft--;
+  state.hintsUsed++;
+  clearNotesPeers(r, c, state.solution[r][c]);
+  cellEls[r][c].classList.add('pulse');
+  setTimeout(() => cellEls[r][c].classList.remove('pulse'), 600);
+
+  if (isComplete()) {
+    setTimeout(() => endGame(true), 400);
+    render();
+    return;
+  }
+  render();
+}
+
+function isComplete() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (state.board[r][c] !== state.solution[r][c]) return false;
+    }
+  }
+  return true;
+}
+
+function toggleNoteMode() {
+  state.noteMode = !state.noteMode;
+  render();
+}
+
+// ============================================================
+// GAME FLOW
+// ============================================================
+
+function startTimer() {
+  state.timer = 0;
+  state.startTime = Date.now();
+  timeVal.textContent = '00:00';
+  clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(() => {
+    state.timer = Math.floor((Date.now() - state.startTime) / 1000);
+    timeVal.textContent = formatTime(state.timer);
+  }, 250);
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+}
+
+function endGame(won) {
+  state.gameOver = true;
+  state.won = won;
+  stopTimer();
+
+  let isBest = false;
+  if (won) {
+    scores[state.difficulty].won++;
+    if (scores[state.difficulty].best === null || state.timer < scores[state.difficulty].best) {
+      scores[state.difficulty].best = state.timer;
+      isBest = true;
+    }
+  }
+
+  const title = document.getElementById('modalTitle');
+  const text = document.getElementById('modalText');
+  title.textContent = won ? 'Solved!' : 'Game Over';
+  title.className = won ? 'win' : 'lose';
+
+  if (won) {
+    if (isBest && scores[state.difficulty].won > 1) text.textContent = 'A new personal best.';
+    else if (state.errors === 0 && state.hintsUsed === 0) text.textContent = 'Flawless. Beautifully done.';
+    else text.textContent = 'Beautiful work.';
+  } else {
+    text.textContent = 'Three mistakes. The puzzle wins this round.';
+  }
+
+  document.getElementById('modalTime').textContent = formatTime(state.timer);
+  document.getElementById('modalErrors').textContent = state.errors;
+  document.getElementById('modalHints').textContent = state.hintsUsed;
+  const timeStat = document.getElementById('modalTime');
+  timeStat.classList.toggle('best', isBest);
+
+  overlay.classList.add('show');
+  render();
+}
+
+async function newGame() {
+  overlay.classList.remove('show');
+  stopTimer();
+  state.gameOver = false;
+  state.won = false;
+  state.errors = 0;
+  state.hintsLeft = 3;
+  state.hintsUsed = 0;
+  state.selected = null;
+  state.noteMode = false;
+  state.timer = 0;
+  timeVal.textContent = '00:00';
+
+  loading.classList.add('show');
+  // Yield to UI thread so the loading state paints
+  await new Promise(r => setTimeout(r, 40));
+
+  const { puzzle, solution } = generatePuzzle(state.difficulty);
+  state.puzzle = puzzle.map(r => [...r]);
+  state.solution = solution.map(r => [...r]);
+  state.board = puzzle.map(r => [...r]);
+  state.fixed = puzzle.map(row => row.map(v => v !== 0));
+  state.notes = Array.from({length: 9}, () => Array.from({length: 9}, () => new Set()));
+
+  loading.classList.remove('show');
+
+  startTimer();
+  render();
+}
+
+// ============================================================
+// EVENT HANDLERS
+// ============================================================
+
+document.getElementById('diffRow').addEventListener('click', (e) => {
+  if (e.target.dataset.diff && e.target.dataset.diff !== state.difficulty) {
+    document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    state.difficulty = e.target.dataset.diff;
+    newGame();
+  }
+});
+
+document.getElementById('newBtn').addEventListener('click', newGame);
+document.getElementById('eraseBtn').addEventListener('click', eraseCell);
+document.getElementById('hintBtn').addEventListener('click', useHint);
+document.getElementById('notesBtn').addEventListener('click', toggleNoteMode);
+document.getElementById('modalNewBtn').addEventListener('click', newGame);
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    overlay.classList.remove('show');
+    return;
+  }
+  if (state.gameOver) return;
+  if (e.key >= '1' && e.key <= '9') {
+    inputNumber(parseInt(e.key));
+  } else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
+    eraseCell();
+  } else if (e.key === 'n' || e.key === 'N') {
+    toggleNoteMode();
+  } else if (e.key === 'h' || e.key === 'H') {
+    useHint();
+  } else if (e.key.startsWith('Arrow')) {
+    let [r, c] = state.selected || [4, 4];
+    if (e.key === 'ArrowUp') r = Math.max(0, r-1);
+    if (e.key === 'ArrowDown') r = Math.min(8, r+1);
+    if (e.key === 'ArrowLeft') c = Math.max(0, c-1);
+    if (e.key === 'ArrowRight') c = Math.min(8, c+1);
+    selectCell(r, c);
+    e.preventDefault();
+  }
+});
+
+// ============================================================
+// INIT
+// ============================================================
+
+buildGrid();
+buildNumPad();
+renderScoreboard();
+newGame();
+</script>
+</body>
+</html>
