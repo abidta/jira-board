@@ -235,6 +235,42 @@
   color: var(--danger-color);
 }
 
+/* Detail progress bar */
+.detail-progress-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.detail-progress-bar {
+  flex: 1;
+  height: 6px;
+  background-color: var(--border-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.detail-progress-fill {
+  height: 100%;
+  background-color: var(--color-success, #2ea043);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.detail-progress-fill.over-budget {
+  background-color: var(--color-danger, #f85149);
+}
+
+.detail-progress-percent {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 30px;
+  text-align: right;
+  font-family: var(--font-mono, monospace);
+}
+
 /* Footer */
 .modal-footer {
   padding: 1.25rem 1.75rem;

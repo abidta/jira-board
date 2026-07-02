@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Jira Board
+Comment=Launch Jira Board
+Exec=/bin/bash /home/sainulabid/Desktop/projects/vibe/start.sh
+Icon=/home/sainulabid/Desktop/projects/vibe/public/jira-icon.svg
+Terminal=true
+Type=Application
+Categories=Development;

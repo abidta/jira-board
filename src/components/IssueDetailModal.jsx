@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, ExternalLink, Calendar, User, Tag, AlertTriangle, Clock } from 'lucide-react';
+import { X, ExternalLink, Calendar, User, Tag, AlertTriangle, Clock, Timer } from 'lucide-react';
 import { format, isPast } from 'date-fns';
 import './IssueDetailModal.css';
 
@@ -130,9 +130,30 @@ export function IssueDetailModal({ issue, onClose, jiraBaseUrl }) {
             <div className="detail-group">
               <label>Estimated Time</label>
               <div className="detail-value flex-value">
-                <Clock size={14} className="icon-muted" />
+                <Timer size={14} className="icon-muted" />
                 {fields?.timetracking?.originalEstimate || 'Not estimated'}
               </div>
+            </div>
+
+            <div className="detail-group">
+              <label>Logged Time</label>
+              <div className="detail-value flex-value">
+                <Clock size={14} className="icon-muted" />
+                {fields?.timetracking?.timeSpent || '0h 0m'}
+              </div>
+              {fields?.timetracking?.originalEstimateSeconds > 0 && fields?.timetracking?.timeSpentSeconds > 0 && (
+                <div className="detail-progress-wrapper" style={{ marginTop: '0.2rem' }}>
+                  <div className="detail-progress-bar" title={`${Math.round((fields.timetracking.timeSpentSeconds / fields.timetracking.originalEstimateSeconds) * 100)}% tracked`}>
+                    <div
+                      className={`detail-progress-fill ${fields.timetracking.timeSpentSeconds > fields.timetracking.originalEstimateSeconds ? 'over-budget' : ''}`}
+                      style={{ width: `${Math.min((fields.timetracking.timeSpentSeconds / fields.timetracking.originalEstimateSeconds) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <span className="detail-progress-percent">
+                    {Math.round((fields.timetracking.timeSpentSeconds / fields.timetracking.originalEstimateSeconds) * 100)}%
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="detail-group">

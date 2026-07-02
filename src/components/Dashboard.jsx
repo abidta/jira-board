@@ -11,7 +11,38 @@ import { LayoutGrid } from 'lucide-react';
 import './Dashboard.css';
 
 export function Dashboard({ credentials, onLogout, onSessionExpired }) {
-  const { issues, loading, error, lastSynced, refetch, userProfile } = useJiraIssues(credentials, { onSessionExpired });
+  // Filters state is declared first so showCompleted can be passed to the hook
+  const [filters, setFilters] = useState(() => {
+    const savedFilters = localStorage.getItem('jira_filters');
+    if (savedFilters) {
+      try {
+        const parsed = JSON.parse(savedFilters);
+        if (typeof parsed.status === 'string') {
+          parsed.status = parsed.status ? [parsed.status] : [];
+        }
+        if (typeof parsed.project === 'string') {
+          parsed.project = parsed.project ? [parsed.project] : [];
+        }
+        if (!parsed.statusMode) parsed.statusMode = 'include';
+        if (!parsed.projectMode) parsed.projectMode = 'include';
+        if (parsed.showCompleted === undefined) parsed.showCompleted = false;
+        return parsed;
+      } catch (e) {
+        console.error("Failed to parse saved filters", e);
+      }
+    }
+    return {
+      search: '',
+      status: [],
+      statusMode: 'include',
+      project: [],
+      projectMode: 'include',
+      priority: '',
+      showCompleted: false
+    };
+  });
+
+  const { issues, loading, loadingMore, error, lastSynced, refetch, userProfile, totalAvailable } = useJiraIssues(credentials, { onSessionExpired, showCompleted: filters.showCompleted });
   const { worklogs, loading: worklogsLoading } = useJiraWorklogs(credentials, issues, { onSessionExpired });
   const { theme, toggleTheme } = useTheme();
   
@@ -31,36 +62,6 @@ export function Dashboard({ credentials, onLogout, onSessionExpired }) {
   useEffect(() => {
     localStorage.setItem('jira_view_pref', view);
   }, [view]);
-
-  const [filters, setFilters] = useState(() => {
-    const savedFilters = localStorage.getItem('jira_filters');
-    if (savedFilters) {
-      try {
-        const parsed = JSON.parse(savedFilters);
-        if (typeof parsed.status === 'string') {
-          parsed.status = parsed.status ? [parsed.status] : [];
-        }
-        if (typeof parsed.project === 'string') {
-          parsed.project = parsed.project ? [parsed.project] : [];
-        }
-        // Ensure mode fields exist for backwards compatibility
-        if (!parsed.statusMode) parsed.statusMode = 'include';
-        if (!parsed.projectMode) parsed.projectMode = 'include';
-        return parsed;
-      } catch (e) {
-        console.error("Failed to parse saved filters", e);
-      }
-    }
-    return {
-      search: '',
-      status: [],
-      statusMode: 'include',
-      project: [],
-      projectMode: 'include',
-      priority: '',
-      showCompleted: true
-    };
-  });
 
   useEffect(() => {
     localStorage.setItem('jira_filters', JSON.stringify(filters));
@@ -111,6 +112,10 @@ export function Dashboard({ credentials, onLogout, onSessionExpired }) {
     });
   }, [issues, filters]);
 
+  const doneCount = useMemo(() => {
+    return issues.filter(i => i.fields?.status?.statusCategory?.key === 'done').length;
+  }, [issues]);
+
   return (
     <div className="dashboard-container">
       <TopBar 
@@ -128,6 +133,7 @@ export function Dashboard({ credentials, onLogout, onSessionExpired }) {
         userProfile={userProfile}
         theme={theme}
         onToggleTheme={toggleTheme}
+        doneCount={doneCount}
       />
       
       <main className="dashboard-content">
@@ -179,6 +185,22 @@ export function Dashboard({ credentials, onLogout, onSessionExpired }) {
                 jiraBaseUrl={jiraBaseUrl} 
                 onIssueClick={setSelectedIssue} 
               />
+            )}
+          </div>
+        )}
+
+        {/* Pagination footer */}
+        {view !== 'analytics' && issues.length > 0 && (
+          <div className="load-more-container">
+            {loadingMore ? (
+              <span className="load-more-status loading">
+                <div className="spinner-small"></div>
+                Loading {issues.length} of {totalAvailable} issues...
+              </span>
+            ) : (
+              <span className="load-more-status">
+                Showing all {issues.length} issue{issues.length !== 1 ? 's' : ''}
+              </span>
             )}
           </div>
         )}

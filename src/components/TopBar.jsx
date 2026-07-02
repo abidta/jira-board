@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, List, LayoutGrid, RefreshCw, LogOut, Gamepad2, BarChart3, Sun, Moon } from 'lucide-react';
+import { Search, List, LayoutGrid, RefreshCw, LogOut, Gamepad2, BarChart3, Sun, Moon, CheckCircle2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { MultiSelect } from './MultiSelect';
@@ -19,7 +19,8 @@ export function TopBar({
   projects,
   userProfile,
   theme,
-  onToggleTheme
+  onToggleTheme,
+  doneCount
 }) {
   const navigate = useNavigate();
   const handleSearchChange = (e) => {
@@ -40,6 +41,10 @@ export function TopBar({
 
   const handleProjectModeChange = (newMode) => {
     setFilters(prev => ({ ...prev, projectMode: newMode }));
+  };
+
+  const toggleShowCompleted = () => {
+    setFilters(prev => ({ ...prev, showCompleted: !prev.showCompleted }));
   };
 
   const syncText = lastSynced ? `Synced ${formatDistanceToNow(new Date(lastSynced), { addSuffix: true })}` : 'Not synced yet';
@@ -91,6 +96,17 @@ export function TopBar({
       </div>
 
       <div className="topbar-right">
+        <button
+          className={`done-toggle-btn ${filters.showCompleted ? 'active' : ''}`}
+          onClick={toggleShowCompleted}
+          title={filters.showCompleted ? 'Hide completed issues' : `Show ${doneCount} completed issues`}
+        >
+          <CheckCircle2 size={17} />
+          {!filters.showCompleted && doneCount > 0 && (
+            <span className="done-toggle-count">{doneCount}</span>
+          )}
+        </button>
+
         <button
           className="theme-toggle-btn"
           onClick={onToggleTheme}
