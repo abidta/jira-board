@@ -1,81 +1,20 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
-const PAGE_SIZE = 50;
-
-export function useJiraIssues(oauthCredentials, { onSessionExpired, showCompleted = false } = {}) {
+export function useJiraIssues(oauthCredentials, { onSessionExpired } = {}) {
   const [issues, setIssues] = useState(() => {
     const cached = localStorage.getItem('jira_issues_cache');
     return cached ? JSON.parse(cached) : [];
   });
   const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [lastSynced, setLastSynced] = useState(() => {
     return localStorage.getItem('jira_last_sync') || null;
   });
-  const [totalAvailable, setTotalAvailable] = useState(0);
 
   const [userProfile, setUserProfile] = useState(() => {
     const cached = localStorage.getItem('jira_user_profile');
     return cached ? JSON.parse(cached) : null;
   });
-
-  // Track the last showCompleted value used for fetching
-  const lastFetchRef = useRef({ showCompleted: null });
-
-  const buildJql = useCallback((includeCompleted) => {
-    let jql = 'assignee=currentUser()';
-    if (!includeCompleted) {
-      jql += ' AND statusCategory != Done';
-    }
-    jql += ' ORDER BY updated DESC';
-    return jql;
-  }, []);
-
-  // Fetch a single page — supports both cursor (nextPageToken) and offset (startAt) pagination
-  const fetchPage = useCallback(async (accessToken, cloudId, jql, { nextPageToken, startAt } = {}) => {
-    const fields = 'summary,status,priority,duedate,project,issuetype,updated,created,description,reporter,timetracking,subtasks';
-    
-    const params = {
-      jql,
-      maxResults: PAGE_SIZE.toString(),
-      fields
-    };
-
-    // Use cursor token if available, otherwise fall back to offset
-    if (nextPageToken) {
-      params.nextPageToken = nextPageToken;
-    } else if (startAt) {
-      params.startAt = startAt.toString();
-    }
-    
-    const query = new URLSearchParams(params);
-    const url = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/search/jql?${query.toString()}`;
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Accept': 'application/json'
-      }
-    });
-
-    if (!response.ok) {
-      if (response.status === 401) {
-        throw { status: 401, message: 'Authentication failed or token expired.' };
-      }
-      throw new Error(`API Error: ${response.status} ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return {
-      issues: data.issues || [],
-      // Cursor-based: nextPageToken present means more pages
-      nextPageToken: data.nextPageToken || null,
-      // Offset-based fallback: total from response
-      total: data.total || 0,
-    };
-  }, []);
 
   const fetchIssues = useCallback(async () => {
     if (!oauthCredentials || !oauthCredentials.accessToken || !oauthCredentials.cloudId) return;
@@ -96,12 +35,29 @@ export function useJiraIssues(oauthCredentials, { onSessionExpired, showComplete
        return;
     }
 
-    const jql = buildJql(showCompleted);
+    const jql = 'assignee=currentUser() ORDER BY updated DESC';
+    const fields = 'summary,status,priority,duedate,project,issuetype,updated,created,description,reporter,timetracking,subtasks';
+    const maxResults = 100;
+    
+    const query = new URLSearchParams({
+      jql,
+      maxResults: maxResults.toString(),
+      fields
+    });
+    
+    // New OAuth API endpoint using api.atlassian.com and cloudId
+    const url = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/search/jql?${query.toString()}`;
     const myselfUrl = `https://api.atlassian.com/ex/jira/${cloudId}/rest/api/3/myself`;
 
     try {
-      const [firstPage, myselfResponse] = await Promise.all([
-        fetchPage(accessToken, cloudId, jql),
+      const [response, myselfResponse] = await Promise.all([
+        fetch(url, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Accept': 'application/json'
+          }
+        }),
         fetch(myselfUrl, {
           method: 'GET',
           headers: {
@@ -111,49 +67,34 @@ export function useJiraIssues(oauthCredentials, { onSessionExpired, showComplete
         })
       ]);
 
-      // Render first page immediately
-      let allIssues = [...firstPage.issues];
-      setIssues(allIssues);
-      setTotalAvailable(firstPage.total || allIssues.length);
-      lastFetchRef.current.showCompleted = showCompleted;
+      if (!response.ok) {
+        if (response.status === 401) {
+          if (onSessionExpired) {
+            onSessionExpired();
+            return;
+          }
+          throw new Error('Authentication failed or token expired. Please log out and reconnect.');
+        }
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      const mappedIssues = data.issues || [];
+      
+      setIssues(mappedIssues);
+      localStorage.setItem('jira_issues_cache', JSON.stringify(mappedIssues));
       
       if (myselfResponse.ok) {
         const myselfData = await myselfResponse.json();
         setUserProfile(myselfData);
         localStorage.setItem('jira_user_profile', JSON.stringify(myselfData));
       }
-      
+
       const syncTime = new Date().toISOString();
       setLastSynced(syncTime);
       localStorage.setItem('jira_last_sync', syncTime);
-
-      // Auto-fetch remaining pages in the background
-      let cursor = firstPage.nextPageToken;
-      if (cursor) {
-        setLoading(false);
-        setLoadingMore(true);
-
-        while (cursor) {
-          const nextPage = await fetchPage(accessToken, cloudId, jql, { nextPageToken: cursor });
-          allIssues = [...allIssues, ...nextPage.issues];
-          setIssues([...allIssues]);
-          setTotalAvailable(nextPage.total || allIssues.length);
-          cursor = nextPage.nextPageToken;
-          if (nextPage.issues.length === 0) break; // safety
-        }
-        
-        setLoadingMore(false);
-      }
-      
-      // Final total is the actual count we got
-      setTotalAvailable(allIssues.length);
-      localStorage.setItem('jira_issues_cache', JSON.stringify(allIssues));
       
     } catch (err) {
-      if (err.status === 401 && onSessionExpired) {
-        onSessionExpired();
-        return;
-      }
       if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
          setError('Network error preventing connection to Atlassian API.');
       } else {
@@ -162,30 +103,20 @@ export function useJiraIssues(oauthCredentials, { onSessionExpired, showComplete
     } finally {
       setLoading(false);
     }
-  }, [oauthCredentials, onSessionExpired, showCompleted, buildJql, fetchPage]);
+  }, [oauthCredentials, onSessionExpired]);
 
-  // Initial fetch
   useEffect(() => {
     if (issues.length === 0 && oauthCredentials) {
       fetchIssues();
     }
   }, [oauthCredentials, fetchIssues, issues.length]);
 
-  // Re-fetch when showCompleted changes
-  useEffect(() => {
-    if (oauthCredentials && lastFetchRef.current.showCompleted !== null && lastFetchRef.current.showCompleted !== showCompleted) {
-      fetchIssues();
-    }
-  }, [showCompleted, oauthCredentials, fetchIssues]);
-
   return {
     issues,
     userProfile,
     loading,
-    loadingMore,
     error,
     lastSynced,
-    refetch: fetchIssues,
-    totalAvailable
+    refetch: fetchIssues
   };
 }
